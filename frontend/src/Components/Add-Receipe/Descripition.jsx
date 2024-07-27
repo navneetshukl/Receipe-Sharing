@@ -1,10 +1,53 @@
-import React from "react";
+import React, { useState } from "react";
 import { Form } from "react-bootstrap";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
+import axios from "axios";
 
 const Description = () => {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [ingredients, setIngredients] = useState("");
+
+  const URL = "http://localhost:8080/api/receipe/add";
+
+  // splitIngredients function will split the ingredients after comma
+  const splitIngredients = () => {
+    const arr = ingredients.split(",");
+    return arr;
+  };
+
+  // handleFormSubmit function perform some action on submit of receipe
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+
+    const ingre = splitIngredients();
+
+    axios
+      .post(
+        URL,
+        {
+          name: name,
+          description: description,
+          ingredients: ingre,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((response) => {
+        console.log("Response is ", response);
+        alert("Receipe added successfully!");
+      });
+
+    setDescription("");
+    setName("");
+    setIngredients("");
+  };
+
   return (
     <Form.Group>
       <Row
@@ -31,6 +74,10 @@ const Description = () => {
               width: "40vw",
               resize: "none",
             }}
+            onChange={(e) => {
+              setName(e.target.value);
+            }}
+            value={name}
           />
         </Col>
       </Row>
@@ -61,6 +108,10 @@ const Description = () => {
               height: "30vh",
               resize: "none",
             }}
+            onChange={(e) => {
+              setDescription(e.target.value);
+            }}
+            value={description}
           />
         </Col>
         <Col
@@ -81,6 +132,10 @@ const Description = () => {
               height: "30vh",
               resize: "none",
             }}
+            onChange={(e) => {
+              setIngredients(e.target.value);
+            }}
+            value={ingredients}
           />
         </Col>
       </Row>
@@ -99,13 +154,15 @@ const Description = () => {
             gap: "2vw",
           }}
         >
-          <Button variant="success" type="submit">
+          <Button variant="success" type="submit" onClick={handleFormSubmit}>
             Submit
           </Button>
           <>
             <p>upload Image</p>
             <input type="file"></input>
           </>
+
+          <Button variant="danger">Back</Button>
         </Col>
       </Row>
     </Form.Group>
