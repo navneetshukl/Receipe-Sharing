@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func connectToDB() (*mongo.Client, error) {
+func connectToDB() (*mongo.Database, error) {
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Println("error in loading the env ", err)
@@ -27,16 +27,15 @@ func connectToDB() (*mongo.Client, error) {
 		return nil, err
 	}
 
-	defer client.Disconnect(ctx)
 	err = client.Ping(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
 	log.Println("connected to mongoDB")
-	return client, nil
+	return client.Database("mydb"), nil
 }
 
-func Connect() *mongo.Client {
+func Connect() *mongo.Database {
 	db, err := connectToDB()
 
 	if err != nil {
