@@ -1,7 +1,9 @@
 package ports
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"github.com/navneetshukl/receipe-sharing/internal/core/receipe"
+)
 
 type ReceipeRepo interface {
-	InsertReceipe(userID primitive.ObjectID,name,description string,ingredients []string)error
+	InsertReceipe(data receipe.Receipe) error
 }

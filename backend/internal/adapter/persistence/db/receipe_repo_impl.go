@@ -3,10 +3,8 @@ package db
 import (
 	"context"
 	"log"
-	"time"
 
 	"github.com/navneetshukl/receipe-sharing/internal/core/receipe"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -20,18 +18,11 @@ func NewReceipeDatabase(db *mongo.Database) *ReceipeDatabase {
 	}
 }
 
-func (rd *ReceipeDatabase) InsertReceipe(userID primitive.ObjectID, name, description string, ingredients []string) error {
-	var results receipe.Receipe
+func (rd *ReceipeDatabase) InsertReceipe(data receipe.Receipe) error {
 
-	results.UserID = userID
-	results.Description = description
-	results.Ingredients = ingredients
-	results.Name = name
-	results.Created_At = time.Now()
-
-	_, err := rd.db.Collection("receipe").InsertOne(context.Background(), results)
+	_, err := rd.db.Collection("receipe").InsertOne(context.Background(), data)
 	if err != nil {
-		log.Println("error in inserting to mongodb ",err)
+		log.Println("error in inserting to mongodb ", err)
 		return err
 	}
 	log.Println("Inserted successfully")

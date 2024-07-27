@@ -14,3 +14,7 @@ type Receipe struct {
 	Description string             `json:"description" bson:"description"`
 	Created_At  time.Time          `json:"created_at" bson:"creadted_at"`
 }
+
+type ReceipeUseCaseImpl interface {
+	AddReceipe(data Receipe) error
+}
