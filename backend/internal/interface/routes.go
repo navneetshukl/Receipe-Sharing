@@ -6,7 +6,7 @@ import (
 	"github.com/navneetshukl/receipe-sharing/internal/interface/handler"
 )
 
-func SetUpRoutes(receipeHandler handler.Handler) *gin.Engine {
+func SetUpRoutes(receipeHandler handler.ReceipeHandler, userHandler handler.UserHandler) *gin.Engine {
 	router := gin.Default()
 
 	// CORS configuration
@@ -17,7 +17,8 @@ func SetUpRoutes(receipeHandler handler.Handler) *gin.Engine {
 	}
 	router.Use(cors.New(corsConfig))
 
-	router.POST("/api/receipe/add", receipeHandler.CreateReceipe())
+	router.POST("/api/receipe/add", receipeHandler.CreateReceipeHandler())
+	router.POST("/api/user/add", userHandler.CreateUserHandler())
 	return router
 
 }

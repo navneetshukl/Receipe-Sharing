@@ -8,24 +8,24 @@ import (
 	"github.com/navneetshukl/receipe-sharing/internal/core/receipe"
 )
 
-type Handler struct {
+type ReceipeHandler struct {
 	receipeUsecaseImpl receipe.ReceipeUseCaseImpl
 }
 
-func NewHandler(ru receipe.ReceipeUseCaseImpl) *Handler {
-	return &Handler{
+func NewReceipeHandler(ru receipe.ReceipeUseCaseImpl) *ReceipeHandler {
+	return &ReceipeHandler{
 		receipeUsecaseImpl: ru,
 	}
 }
 
-func (h *Handler) CreateReceipe() func(c *gin.Context) {
+func (h *ReceipeHandler) CreateReceipeHandler() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		var resp receipe.Receipe
 
 		err := c.ShouldBindJSON(&resp)
 		if err != nil {
 			log.Println("error in reading the body ", err)
-			c.JSON(http.StatusInternalServerError,gin.H{
+			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "invalid json",
 			})
 			return

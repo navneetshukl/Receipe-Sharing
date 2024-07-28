@@ -6,7 +6,8 @@ import (
 	"github.com/navneetshukl/receipe-sharing/internal/adapter/persistence/db"
 	routes "github.com/navneetshukl/receipe-sharing/internal/interface"
 	"github.com/navneetshukl/receipe-sharing/internal/interface/handler"
-	receipe "github.com/navneetshukl/receipe-sharing/internal/usecase"
+	"github.com/navneetshukl/receipe-sharing/internal/usecase/receipe"
+	"github.com/navneetshukl/receipe-sharing/internal/usecase/user"
 )
 
 func main() {
@@ -14,13 +15,18 @@ func main() {
 	receipeRepo := db.NewReceipeDatabase(appDB)
 
 	receipeUsecase := receipe.NewReceipeUseCase(receipeRepo)
-	receipeHandler := handler.NewHandler(receipeUsecase)
+	receipeHandler := handler.NewReceipeHandler(receipeUsecase)
 
-	router := routes.SetUpRoutes(*receipeHandler)
+	userRepo := db.NewUserDatabase(appDB)
 
-	err:=router.Run(":8080")
-	if err!=nil{
-		log.Println("error in starting the server ",err)
+	userUseCase := user.NewUserUseCase(userRepo)
+	userHandler := handler.NewUserHandler(userUseCase)
+
+	router := routes.SetUpRoutes(*receipeHandler, *userHandler)
+
+	err := router.Run(":8080")
+	if err != nil {
+		log.Println("error in starting the server ", err)
 		return
 	}
 	log.Println("server started succesfully at port 8080")
