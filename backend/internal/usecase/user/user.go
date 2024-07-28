@@ -7,6 +7,7 @@ import (
 	"github.com/navneetshukl/receipe-sharing/internal/adapter/persistence/ports"
 	"github.com/navneetshukl/receipe-sharing/internal/core/user"
 	"github.com/navneetshukl/receipe-sharing/pkg/helper"
+	"github.com/navneetshukl/receipe-sharing/pkg/middleware"
 )
 
 type UserUseCase struct {
@@ -35,30 +36,30 @@ func (uc *UserUseCase) AddUser(data *user.User) error {
 
 	userDet, err := uc.User.FindUserByEmailOrPhone(data.Phone, true)
 	if err != nil {
-		if err!=db.ErrDocumentNotFound{
+		if err != db.ErrDocumentNotFound {
 			log.Println("error in finding user by phone", err)
-            return user.ErrSomethingWentWrong
+			return user.ErrSomethingWentWrong
 		}
 
 	}
 
-	if userDet!=nil{
+	if userDet != nil {
 		log.Println("user with the same  phone already exists")
-        return user.ErrUserAlreadyExist
+		return user.ErrUserAlreadyExist
 	}
 
 	userDet, err = uc.User.FindUserByEmailOrPhone(data.Email, false)
 	if err != nil {
-		if err!=db.ErrDocumentNotFound{
+		if err != db.ErrDocumentNotFound {
 			log.Println("error in finding user by email", err)
-            return user.ErrSomethingWentWrong
+			return user.ErrSomethingWentWrong
 		}
 
 	}
 
-	if userDet!=nil{
+	if userDet != nil {
 		log.Println("user with the same email  already exists")
-        return user.ErrUserAlreadyExist
+		return user.ErrUserAlreadyExist
 	}
 
 	hashPassword, err := helper.HashPassword(data.Password)
@@ -75,5 +76,34 @@ func (uc *UserUseCase) AddUser(data *user.User) error {
 	}
 
 	return nil
+
+}
+
+func (uc *UserUseCase) LoginUser(loginData *user.LoginUser) (string, string, error) {
+	if loginData.Email == "" || len(loginData.Name) == 0 {
+		log.Println("email is missing")
+		return "", "", user.ErrMissingField
+	}
+
+	loginUser, err := uc.User.FindUserByEmailOrPhone(loginData.Email, false)
+	if err != nil {
+		if err == db.ErrDocumentNotFound {
+			return "", "", user.ErrUserNotFound
+		}
+		return "", "", user.ErrSomethingWentWrong
+	}
+
+	err = helper.ComaprePassword(loginData.Password, loginUser.Password)
+	if err != nil {
+		log.Println("password doesnot match ", err)
+		return "", "", user.ErrInvalidPassword
+	}
+
+	token, err := middleware.GenerateJWT(loginUser.ID.Hex())
+	if err != nil {
+		log.Println("error in generating jwt ", err)
+		return "", "", user.ErrSomethingWentWrong
+	}
+	return token, loginUser.ID.Hex(), nil
 
 }

@@ -19,6 +19,7 @@ func SetUpRoutes(receipeHandler handler.ReceipeHandler, userHandler handler.User
 
 	router.POST("/api/receipe/add", receipeHandler.CreateReceipeHandler())
 	router.POST("/api/user/add", userHandler.CreateUserHandler())
+	router.POST("/api/user/login", userHandler.LoginUserHandler())
 	return router
 
 }

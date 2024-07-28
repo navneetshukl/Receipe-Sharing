@@ -9,4 +9,6 @@ var (
 	ErrAddingUser         = errors.New("error in inserting the user")
 	ErrSomethingWentWrong = errors.New("something went wrong")
 	ErrUserAlreadyExist   = errors.New("user already exist")
+	ErrUserNotFound       = errors.New("user not found")
+	ErrInvalidPassword    = errors.New("password does not match")
 )

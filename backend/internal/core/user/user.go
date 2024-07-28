@@ -14,6 +14,8 @@ type User struct {
 	Password  string             `json:"password" bson:"password"`
 	CreatedAt time.Time          `json:"created_at" bson:"created_at"`
 }
-type UserUseCaseImpl interface{
-	AddUser(user *User)error
+
+type UserUseCaseImpl interface {
+	AddUser(user *User) error
+	LoginUser(loginData *LoginUser) (string, string, error)
 }

@@ -32,3 +32,25 @@ func (uh *UserHandler) CreateUserHandler() func(c *gin.Context) {
 
 	}
 }
+
+func (uh *UserHandler) LoginUserHandler() func(c *gin.Context) {
+	return func(c *gin.Context) {
+
+		var loginUser user.LoginUser
+		err := c.ShouldBindJSON(&loginUser)
+		if err != nil {
+			c.JSON(400, gin.H{"error": "Invalid request body"})
+			return
+		}
+
+		jwtToken, userID, err := uh.userUsecaseImpl.LoginUser(&loginUser)
+		if err != nil {
+			c.JSON(401, gin.H{"error": "Invalid username or password"})
+			return
+		}
+		c.JSON(200, gin.H{
+			"token":  jwtToken,
+			"userId": userID,
+		})
+	}
+}
