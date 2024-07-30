@@ -12,10 +12,11 @@ const Login = () => {
 
   const URL = "http://localhost:8080/api/user/login";
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    axios
-      .post(
+  
+    try {
+      const res = await axios.post(
         URL,
         {
           name: name,
@@ -27,17 +28,24 @@ const Login = () => {
             "Content-Type": "application/json",
           },
         }
-      )
-      .then((res) => {
-        console.log("Response is ", res);
-      });
-    setResponse(res);
+      );
+  
+      console.log("Response is ", res);
+      setResponse(res); // Assuming setResponse is a state setter from useState or similar
+    } catch (error) {
+      console.error("Error during form submission", error);
+    }
+
+    setName("")
+    setEmail("")
+    setPassword("")
   };
+  
   return (
     <Container style={{ marginTop: "5vh" }}>
       <h4 style={{ textAlign: "center" }}>Login</h4>
       <Container style={{ marginTop: "15vh", width: "50vw" }}>
-        <Form>
+        <Form onSubmit={handleFormSubmit}>
           <Form.Group>
             <Form.Label>Name</Form.Label>
             <Form.Control
@@ -73,10 +81,10 @@ const Login = () => {
             style={{ marginTop: "3vh" }}
             type="submit"
             size="lg"
-            onClick={handleFormSubmit}
+           
           >
             Submit
-          </Button>{" "}
+          </Button>
         </Form>
       </Container>
     </Container>

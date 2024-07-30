@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/navneetshukl/receipe-sharing/internal/core/user"
 )
@@ -43,11 +45,13 @@ func (uh *UserHandler) LoginUserHandler() func(c *gin.Context) {
 			return
 		}
 
+		log.Println("login user is ", loginUser)
+
 		jwtToken, userID, err := uh.userUsecaseImpl.LoginUser(&loginUser)
-		if err != nil {
-			c.JSON(401, gin.H{"error": "Invalid username or password"})
-			return
-		}
+		// if err != nil {
+		// 	c.JSON(401, gin.H{"error": "Invalid username or password"})
+		// 	return
+		// }
 		c.JSON(200, gin.H{
 			"token":  jwtToken,
 			"userId": userID,

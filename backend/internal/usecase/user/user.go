@@ -80,7 +80,7 @@ func (uc *UserUseCase) AddUser(data *user.User) error {
 }
 
 func (uc *UserUseCase) LoginUser(loginData *user.LoginUser) (string, string, error) {
-	if loginData.Email == "" || len(loginData.Name) == 0 {
+	if loginData.Email == "" || len(loginData.Email) == 0 {
 		log.Println("email is missing")
 		return "", "", user.ErrMissingField
 	}
@@ -93,6 +93,17 @@ func (uc *UserUseCase) LoginUser(loginData *user.LoginUser) (string, string, err
 		return "", "", user.ErrSomethingWentWrong
 	}
 
+	// Check if loginUser is nil
+	if loginUser == nil {
+		log.Println("loginUser is nil")
+		return "", "", user.ErrUserNotFound
+	}
+
+	// Check if loginUser.Password is empty
+	if loginUser.Password == "" {
+		log.Println("password is missing for user")
+		return "", "", user.ErrUserNotFound
+	}
 	err = helper.ComaprePassword(loginData.Password, loginUser.Password)
 	if err != nil {
 		log.Println("password doesnot match ", err)
