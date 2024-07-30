@@ -8,18 +8,20 @@ import (
 	"github.com/navneetshukl/receipe-sharing/internal/interface/handler"
 	"github.com/navneetshukl/receipe-sharing/internal/usecase/receipe"
 	"github.com/navneetshukl/receipe-sharing/internal/usecase/user"
+	"github.com/navneetshukl/receipe-sharing/pkg/logging"
 )
 
 func main() {
 	appDB := db.Connect()
+	logs:=logging.NewLogging()
 	receipeRepo := db.NewReceipeDatabase(appDB)
 
-	receipeUsecase := receipe.NewReceipeUseCase(receipeRepo)
+	receipeUsecase := receipe.NewReceipeUseCase(receipeRepo,logs)
 	receipeHandler := handler.NewReceipeHandler(receipeUsecase)
 
 	userRepo := db.NewUserDatabase(appDB)
 
-	userUseCase := user.NewUserUseCase(userRepo)
+	userUseCase := user.NewUserUseCase(userRepo,logs)
 	userHandler := handler.NewUserHandler(userUseCase)
 
 	router := routes.SetUpRoutes(*receipeHandler, *userHandler)

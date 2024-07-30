@@ -1,34 +1,35 @@
 package user
 
 import (
-	"log"
-
 	"github.com/navneetshukl/receipe-sharing/internal/adapter/persistence/db"
 	"github.com/navneetshukl/receipe-sharing/internal/adapter/persistence/ports"
 	"github.com/navneetshukl/receipe-sharing/internal/core/user"
 	"github.com/navneetshukl/receipe-sharing/pkg/helper"
+	"github.com/navneetshukl/receipe-sharing/pkg/logging"
 	"github.com/navneetshukl/receipe-sharing/pkg/middleware"
 )
 
 type UserUseCase struct {
 	User ports.UserRepo
+	Logs logging.LogService
 }
 
-func NewUserUseCase(user ports.UserRepo) *UserUseCase {
+func NewUserUseCase(user ports.UserRepo, logs logging.LogService) *UserUseCase {
 	return &UserUseCase{
 		User: user,
+		Logs: logs,
 	}
 }
 
 // AddUser function will add the user
 func (uc *UserUseCase) AddUser(data *user.User) error {
 	if len(data.Name) == 0 || len(data.Email) == 0 || len(data.Password) == 0 || len(data.Phone) == 0 {
-		log.Println("some fields are missing")
+		uc.Logs.ErrorLog("Some fields are missing ", nil)
 		return user.ErrMissingField
 	}
 
 	if len(data.Phone) != 10 {
-		log.Println("phone number is not valid")
+		uc.Logs.ErrorLog("phone number is not valid", nil)
 		return user.ErrInvalidPhoneNumber
 	}
 
@@ -37,41 +38,41 @@ func (uc *UserUseCase) AddUser(data *user.User) error {
 	userDet, err := uc.User.FindUserByEmailOrPhone(data.Phone, true)
 	if err != nil {
 		if err != db.ErrDocumentNotFound {
-			log.Println("error in finding user by phone", err)
+			uc.Logs.ErrorLog("FindUserByEmailOrPhone ", err)
 			return user.ErrSomethingWentWrong
 		}
 
 	}
 
 	if userDet != nil {
-		log.Println("user with the same  phone already exists")
+		uc.Logs.ErrorLog("user with the same  phone already exists", nil)
 		return user.ErrUserAlreadyExist
 	}
 
 	userDet, err = uc.User.FindUserByEmailOrPhone(data.Email, false)
 	if err != nil {
 		if err != db.ErrDocumentNotFound {
-			log.Println("error in finding user by email", err)
+			uc.Logs.ErrorLog("FindUserByEmailOrPhone ", err)
 			return user.ErrSomethingWentWrong
 		}
 
 	}
 
 	if userDet != nil {
-		log.Println("user with the same email  already exists")
+		uc.Logs.ErrorLog("user with the same email  already exists ", nil)
 		return user.ErrUserAlreadyExist
 	}
 
 	hashPassword, err := helper.HashPassword(data.Password)
 	if err != nil {
-		log.Println("error in hashing the password")
+		uc.Logs.ErrorLog("HashPassword ", nil)
 		return user.ErrHashingPassword
 	}
 
 	data.Password = hashPassword
 	err = uc.User.InsertUser(data)
 	if err != nil {
-		log.Println("error in adding the user ", err)
+		uc.Logs.ErrorLog("InsertUser ", err)
 		return user.ErrAddingUser
 	}
 
@@ -81,12 +82,13 @@ func (uc *UserUseCase) AddUser(data *user.User) error {
 
 func (uc *UserUseCase) LoginUser(loginData *user.LoginUser) (string, string, error) {
 	if loginData.Email == "" || len(loginData.Email) == 0 {
-		log.Println("email is missing")
+		uc.Logs.ErrorLog("email is missing", nil)
 		return "", "", user.ErrMissingField
 	}
 
 	loginUser, err := uc.User.FindUserByEmailOrPhone(loginData.Email, false)
 	if err != nil {
+		uc.Logs.ErrorLog("FindUserByEmailOrPhone ", err)
 		if err == db.ErrDocumentNotFound {
 			return "", "", user.ErrUserNotFound
 		}
@@ -95,24 +97,24 @@ func (uc *UserUseCase) LoginUser(loginData *user.LoginUser) (string, string, err
 
 	// Check if loginUser is nil
 	if loginUser == nil {
-		log.Println("loginUser is nil")
+		uc.Logs.ErrorLog("loginUser is nil", nil)
 		return "", "", user.ErrUserNotFound
 	}
 
 	// Check if loginUser.Password is empty
 	if loginUser.Password == "" {
-		log.Println("password is missing for user")
+		uc.Logs.ErrorLog("password is missing for user ", nil)
 		return "", "", user.ErrUserNotFound
 	}
 	err = helper.ComaprePassword(loginData.Password, loginUser.Password)
 	if err != nil {
-		log.Println("password doesnot match ", err)
+		uc.Logs.ErrorLog("ComaprePassword ", err)
 		return "", "", user.ErrInvalidPassword
 	}
 
 	token, err := middleware.GenerateJWT(loginUser.ID.Hex())
 	if err != nil {
-		log.Println("error in generating jwt ", err)
+		uc.Logs.ErrorLog("GenerateJWT ", err)
 		return "", "", user.ErrSomethingWentWrong
 	}
 	return token, loginUser.ID.Hex(), nil
