@@ -5,7 +5,9 @@ import (
 
 	"github.com/navneetshukl/receipe-sharing/internal/adapter/persistence/db"
 	routes "github.com/navneetshukl/receipe-sharing/internal/interface"
-	"github.com/navneetshukl/receipe-sharing/internal/interface/handler"
+	receipeHand "github.com/navneetshukl/receipe-sharing/internal/interface/handler/receipe"
+	userHand "github.com/navneetshukl/receipe-sharing/internal/interface/handler/user"
+
 	"github.com/navneetshukl/receipe-sharing/internal/usecase/receipe"
 	"github.com/navneetshukl/receipe-sharing/internal/usecase/user"
 	"github.com/navneetshukl/receipe-sharing/pkg/logging"
@@ -13,16 +15,15 @@ import (
 
 func main() {
 	appDB := db.Connect()
-	logs:=logging.NewLogging()
+	logs := logging.NewLogging()
 	receipeRepo := db.NewReceipeDatabase(appDB)
 
-	receipeUsecase := receipe.NewReceipeUseCase(receipeRepo,logs)
-	receipeHandler := handler.NewReceipeHandler(receipeUsecase)
+	receipeUseCase := receipe.NewReceipeUseCase(receipeRepo, logs)
+	receipeHandler := receipeHand.NewReceipeHandler(receipeUseCase)
 
 	userRepo := db.NewUserDatabase(appDB)
-
-	userUseCase := user.NewUserUseCase(userRepo,logs)
-	userHandler := handler.NewUserHandler(userUseCase)
+	userUseCase := user.NewUserUseCase(userRepo, logs)
+	userHandler := userHand.NewUserHandler(userUseCase)
 
 	router := routes.SetUpRoutes(*receipeHandler, *userHandler)
 

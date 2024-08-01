@@ -3,10 +3,13 @@ package routes
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/navneetshukl/receipe-sharing/internal/interface/handler"
+	"github.com/navneetshukl/receipe-sharing/internal/interface/handler/receipe"
+	"github.com/navneetshukl/receipe-sharing/internal/interface/handler/user"
+	// "github.com/navneetshukl/receipe-sharing/internal/interface/handler/receipe"
+	// "github.com/navneetshukl/receipe-sharing/internal/interface/handler/user"
 )
 
-func SetUpRoutes(receipeHandler handler.ReceipeHandler, userHandler handler.UserHandler) *gin.Engine {
+func SetUpRoutes(receipeHandler receipe.ReceipeHandler, userHandler user.UserHandler) *gin.Engine {
 	router := gin.Default()
 
 	// CORS configuration
