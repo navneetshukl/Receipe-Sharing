@@ -48,10 +48,10 @@ func NewLogging() *Logging {
 }
 
 type LogService interface {
-	ErrorLog(funcName string, err ...error)
+	ErrorLog(funcName string, err error)
 }
 
-func (l *Logging) ErrorLog(funcName string, err ...error) {
+func (l *Logging) ErrorLog(funcName string, err error) {
 
 	l.Logger.Sugar().Errorf("%s = %v ", funcName, err)
 

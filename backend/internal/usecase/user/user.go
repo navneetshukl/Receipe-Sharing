@@ -1,6 +1,8 @@
 package user
 
 import (
+	"errors"
+
 	"github.com/navneetshukl/receipe-sharing/internal/adapter/persistence/db"
 	"github.com/navneetshukl/receipe-sharing/internal/adapter/persistence/ports"
 	"github.com/navneetshukl/receipe-sharing/internal/core/user"
@@ -97,7 +99,7 @@ func (uc *UserUseCase) LoginUser(loginData *user.LoginUser) (string, string, err
 
 	// Check if loginUser is nil
 	if loginUser == nil {
-		uc.Logs.ErrorLog("loginUser is nil", nil)
+		uc.Logs.ErrorLog("loginUser is nil", errors.New("user is not present"))
 		return "", "", user.ErrUserNotFound
 	}
 

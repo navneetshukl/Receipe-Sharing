@@ -41,17 +41,17 @@ func (uh *UserHandler) LoginUserHandler() func(c *gin.Context) {
 		var loginUser user.LoginUser
 		err := c.ShouldBindJSON(&loginUser)
 		if err != nil {
-			c.JSON(400, gin.H{"error": "Invalid request body"})
+			handleError(c, err)
 			return
 		}
 
 		log.Println("login user is ", loginUser)
 
 		jwtToken, userID, err := uh.userUsecaseImpl.LoginUser(&loginUser)
-		// if err != nil {
-		// 	c.JSON(401, gin.H{"error": "Invalid username or password"})
-		// 	return
-		// }
+		if err != nil {
+			handleError(c, err)
+			return
+		}
 		c.JSON(200, gin.H{
 			"token":  jwtToken,
 			"userId": userID,

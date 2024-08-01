@@ -1,7 +1,6 @@
 package receipe
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -24,20 +23,18 @@ func (h *ReceipeHandler) CreateReceipeHandler() func(c *gin.Context) {
 
 		err := c.ShouldBindJSON(&resp)
 		if err != nil {
-			log.Println("error in reading the body ", err)
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "invalid json",
-			})
+			handlerError(c, err)
 			return
 		}
 
 		err = h.receipeUsecaseImpl.AddReceipe(resp)
 		if err != nil {
-			c.JSON(500, gin.H{"error": err.Error()})
+			handlerError(c, err)
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"message": "data inserted successfully",
+			"data":    []string{},
 		})
 	}
 }
