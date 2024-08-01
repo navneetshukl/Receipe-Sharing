@@ -30,17 +30,33 @@ const Login = () => {
         }
       );
   
-      console.log("Response is ", res);
-      setResponse(res); // Assuming setResponse is a state setter from useState or similar
+      // Logging response data and status code
+      console.log("Response data:", res.data);
+      console.log("Status code:", res.status);
+  
+      // Update state with the response
+      setResponse(res);
+  
     } catch (error) {
-      console.error("Error during form submission", error);
+      // Error handling
+      console.error(
+        "Error during form submission:",
+        error.response ? error.response.data : error.message
+      );
+      
+      // If the error response exists, log the status code
+      if (error.response) {
+        console.error("Error status code:", error.response.status);
+      }
     }
-
-    setName("")
-    setEmail("")
-    setPassword("")
+  
+    // Clear form fields
+    setName("");
+    setEmail("");
+    setPassword("");
   };
   
+
   return (
     <Container style={{ marginTop: "5vh" }}>
       <h4 style={{ textAlign: "center" }}>Login</h4>
@@ -81,7 +97,6 @@ const Login = () => {
             style={{ marginTop: "3vh" }}
             type="submit"
             size="lg"
-           
           >
             Submit
           </Button>
