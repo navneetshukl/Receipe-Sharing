@@ -5,13 +5,15 @@ import "./App.css";
 import Home from "./Components/Receipe/Home";
 import Descripition from "./Components/Add-Receipe/Descripition";
 import Login from "./Components/Login/Login";
+import Register from "./Components/Register/Register";
 
 function App() {
   return (
     <>
       {/* <Home/> */}
       {/* <Descripition /> */}
-      <Login/>
+      {/* <Login/> */}
+      <Register/>
     </>
   );
 }
