@@ -5,8 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/navneetshukl/receipe-sharing/internal/interface/handler/receipe"
 	"github.com/navneetshukl/receipe-sharing/internal/interface/handler/user"
-	// "github.com/navneetshukl/receipe-sharing/internal/interface/handler/receipe"
-	// "github.com/navneetshukl/receipe-sharing/internal/interface/handler/user"
+
 )
 
 func SetUpRoutes(receipeHandler receipe.ReceipeHandler, userHandler user.UserHandler) *gin.Engine {
@@ -21,7 +20,7 @@ func SetUpRoutes(receipeHandler receipe.ReceipeHandler, userHandler user.UserHan
 	router.Use(cors.New(corsConfig))
 
 	router.POST("/api/receipe/add", receipeHandler.CreateReceipeHandler())
-	router.POST("/api/user/add", userHandler.CreateUserHandler())
+	router.POST("/api/user/register", userHandler.CreateUserHandler())
 	router.POST("/api/user/login", userHandler.LoginUserHandler())
 	return router
 

@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+	"time"
 
 	"github.com/navneetshukl/receipe-sharing/internal/adapter/persistence/db"
 	"github.com/navneetshukl/receipe-sharing/internal/adapter/persistence/ports"
@@ -25,19 +26,19 @@ func NewUserUseCase(user ports.UserRepo, logs logging.LogService) *UserUseCase {
 
 // AddUser function will add the user
 func (uc *UserUseCase) AddUser(data *user.User) error {
-	if len(data.Name) == 0 || len(data.Email) == 0 || len(data.Password) == 0 || len(data.Phone) == 0 {
+	if len(data.Name) == 0 || len(data.Email) == 0 || len(data.Password) == 0 || len(data.Mobile) == 0 {
 		uc.Logs.ErrorLog("Some fields are missing ", nil)
 		return user.ErrMissingField
 	}
 
-	if len(data.Phone) != 10 {
+	if len(data.Mobile) != 10 {
 		uc.Logs.ErrorLog("phone number is not valid", nil)
 		return user.ErrInvalidPhoneNumber
 	}
 
 	// check if user with particular email or phone is present
 
-	userDet, err := uc.User.FindUserByEmailOrPhone(data.Phone, true)
+	userDet, err := uc.User.FindUserByEmailOrPhone(data.Mobile, true)
 	if err != nil {
 		if err != db.ErrDocumentNotFound {
 			uc.Logs.ErrorLog("FindUserByEmailOrPhone ", err)
@@ -72,6 +73,7 @@ func (uc *UserUseCase) AddUser(data *user.User) error {
 	}
 
 	data.Password = hashPassword
+	data.CreatedAt = time.Now()
 	err = uc.User.InsertUser(data)
 	if err != nil {
 		uc.Logs.ErrorLog("InsertUser ", err)

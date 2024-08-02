@@ -27,7 +27,7 @@ func (uh *UserHandler) CreateUserHandler() func(c *gin.Context) {
 		}
 		err = uh.userUsecaseImpl.AddUser(&userDet)
 		if err != nil {
-			c.JSON(500, gin.H{"error": "Error adding user"})
+			handleError(c, err)
 			return
 		}
 		c.JSON(201, userDet)
