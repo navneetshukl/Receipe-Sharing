@@ -10,12 +10,14 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [mobile, setMobile] = useState("");
 
+  const URL = "http://localhost:8080/api/user/register";
+
   const handleFormSubmission = async (e) => {
     e.preventDefault();
 
     try {
       const resp = await axios.post(
-        "http://localhost:3001/api/user/register",
+        URL,
         {
           name: name,
           email: email,
