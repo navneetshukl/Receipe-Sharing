@@ -3,6 +3,8 @@ import Form from "react-bootstrap/Form";
 import Container from "react-bootstrap/Container";
 import Button from "react-bootstrap/Button";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Import CSS for toast
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -32,24 +34,43 @@ const Register = () => {
       );
 
       console.log("response is ", resp.data);
+      console.log("resp status is ", resp.status);
+
+      // Show success toast
+      if (resp.status === 201) {
+        toast.success(resp.data.message || "user registered successfully!", {
+          position: "top-right",
+          autoClose: 10000,
+          closeOnClick: true,
+          pauseOnHover: true,
+        });
+      }
     } catch (error) {
-      // Error handling
       console.error(
         "Error during form submission:",
         error.response ? error.response.data : error.message
       );
 
-      // If the error response exists, log the status code
       if (error.response) {
         console.error("Error status code:", error.response.status);
+
+        // Show error toast
+        if (error.response.status === 500) {
+          toast.error(error.response.data.error || "something went wrong", {
+            position: "top-right",
+            autoClose: 10000,
+            closeOnClick: true,
+            pauseOnHover: true,
+          });
+        }
       }
     }
-
     setEmail("");
     setName("");
     setPassword("");
     setMobile("");
   };
+
   return (
     <Container style={{ marginTop: "5vh" }}>
       <h4 style={{ textAlign: "center" }}>Register</h4>
@@ -60,9 +81,7 @@ const Register = () => {
             <Form.Control
               type="text"
               value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-              }}
+              onChange={(e) => setName(e.target.value)}
             />
           </Form.Group>
           <Form.Group>
@@ -70,9 +89,7 @@ const Register = () => {
             <Form.Control
               type="email"
               value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-              }}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </Form.Group>
           <Form.Group>
@@ -80,9 +97,7 @@ const Register = () => {
             <Form.Control
               type="password"
               value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-              }}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </Form.Group>
           <Form.Group>
@@ -90,9 +105,7 @@ const Register = () => {
             <Form.Control
               type="text"
               value={mobile}
-              onChange={(e) => {
-                setMobile(e.target.value);
-              }}
+              onChange={(e) => setMobile(e.target.value)}
             />
           </Form.Group>
           <Button
@@ -105,6 +118,7 @@ const Register = () => {
           </Button>
         </Form>
       </Container>
+      <ToastContainer />
     </Container>
   );
 };
