@@ -124,6 +124,7 @@ func (uc *UserUseCase) LoginUser(loginData *user.LoginUser) (string, string, err
 		uc.Logs.ErrorLog("GenerateJWT ", err)
 		return "", "", user.ErrSomethingWentWrong
 	}
+
 	return token, loginUser.ID.Hex(), nil
 
 }

@@ -6,6 +6,7 @@ import Home from "./Components/Receipe/Home";
 import Descripition from "./Components/Add-Receipe/Descripition";
 import Login from "./Components/Login/Login";
 import Register from "./Components/Register/Register";
+import Auth from "./Components/Auth/Auth";
 
 function App() {
   return (
@@ -14,6 +15,8 @@ function App() {
       {/* <Descripition /> */}
       <Login/>
       {/* <Register/> */}
+
+      <Auth/>
     </>
   );
 }

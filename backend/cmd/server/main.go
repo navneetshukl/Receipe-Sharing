@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/joho/godotenv"
 	"github.com/navneetshukl/receipe-sharing/internal/adapter/persistence/db"
 	routes "github.com/navneetshukl/receipe-sharing/internal/interface"
 	receipeHand "github.com/navneetshukl/receipe-sharing/internal/interface/handler/receipe"
@@ -13,6 +14,12 @@ import (
 	"github.com/navneetshukl/receipe-sharing/pkg/logging"
 )
 
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file", err)
+	}
+}
 func main() {
 	appDB := db.Connect()
 	logs := logging.NewLogging()

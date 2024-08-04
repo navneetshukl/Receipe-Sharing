@@ -2,6 +2,8 @@ package user
 
 import (
 	"log"
+	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/navneetshukl/receipe-sharing/internal/core/user"
@@ -52,9 +54,29 @@ func (uh *UserHandler) LoginUserHandler() func(c *gin.Context) {
 			handleError(c, err)
 			return
 		}
+
+		//save jwt token to cookie
+		c.SetSameSite(http.SameSiteLaxMode)
+		c.SetCookie("Authorization", jwtToken, int(time.Hour*24*30), "/", "", false, true)
+		value, err := c.Cookie("Authorization")
+		if err != nil {
+			log.Println("Error in getting cookie value in login ", err)
+		} else {
+			log.Println("Cookie value in login is ", value)
+		}
 		c.JSON(200, gin.H{
 			"token":  jwtToken,
 			"userId": userID,
+		})
+	}
+}
+
+func (uh *UserHandler) AuthHandler() func(c *gin.Context) {
+	return func(c *gin.Context) {
+		value, _ := c.Get("user")
+		log.Println("Value is ", value)
+		c.JSON(http.StatusOK, gin.H{
+			"message": "user authenticated",
 		})
 	}
 }

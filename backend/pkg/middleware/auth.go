@@ -31,22 +31,17 @@ func GenerateJWT(userID string) (string, error) {
 		return "", err
 	}
 
-	//? Save this JWT token to Cookie
-
-	// c.SetSameSite(http.SameSiteLaxMode)
-	// c.SetCookie("Authorization", tokenString, int(time.Hour*24*30), "/", "", false, true)
-
 	return tokenString, nil
 }
 
 func AuthenticateJWT(c *gin.Context) {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file", err)
-		return
-	}
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Fatal("Error loading .env file", err)
+	// 	return
+	// }
 	tokenString, err := c.Cookie("Authorization")
-	secret := os.Getenv("SECRET")
+	secret := os.Getenv("JWT_SECRET_KEY")
 
 	if err != nil {
 		log.Println("Error in Getting the Tokenstring from cookie ", err)
