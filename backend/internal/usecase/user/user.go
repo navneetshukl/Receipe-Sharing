@@ -31,10 +31,12 @@ func (uc *UserUseCase) AddUser(data *user.User) error {
 		return user.ErrMissingField
 	}
 
-	if len(data.Mobile) != 10 {
-		uc.Logs.ErrorLog("phone number is not valid", nil)
-		return user.ErrInvalidPhoneNumber
-	}
+	// uncomment this code in production
+
+	// if len(data.Mobile) != 10 {
+	// 	uc.Logs.ErrorLog("phone number is not valid", nil)
+	// 	return user.ErrInvalidPhoneNumber
+	// }
 
 	// check if user with particular email or phone is present
 
@@ -54,15 +56,16 @@ func (uc *UserUseCase) AddUser(data *user.User) error {
 
 	userDet, err = uc.User.FindUserByEmailOrPhone(data.Email, false)
 	if err != nil {
+		uc.Logs.ErrorLog("FindUserByEmailOrPhone ", err)
+
 		if err != db.ErrDocumentNotFound {
-			uc.Logs.ErrorLog("FindUserByEmailOrPhone ", err)
 			return user.ErrSomethingWentWrong
 		}
 
 	}
 
 	if userDet != nil {
-		uc.Logs.ErrorLog("user with the same email  already exists ", nil)
+		uc.Logs.ErrorLog("user with the same email  already exists ", errors.New("user already exist"))
 		return user.ErrUserAlreadyExist
 	}
 
@@ -107,7 +110,7 @@ func (uc *UserUseCase) LoginUser(loginData *user.LoginUser) (string, string, err
 
 	// Check if loginUser.Password is empty
 	if loginUser.Password == "" {
-		uc.Logs.ErrorLog("password is missing for user ", nil)
+		uc.Logs.ErrorLog("password is missing for user ", errors.New("password is missing"))
 		return "", "", user.ErrUserNotFound
 	}
 	err = helper.ComaprePassword(loginData.Password, loginUser.Password)

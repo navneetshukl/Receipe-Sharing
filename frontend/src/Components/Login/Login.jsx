@@ -3,23 +3,22 @@ import Form from "react-bootstrap/Form";
 import Container from "react-bootstrap/Container";
 import Button from "react-bootstrap/Button";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Import CSS for toast
 
 const Login = () => {
-  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
-  const [response, setResponse] = useState(null);
 
   const URL = "http://localhost:8080/api/user/login";
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-  
+
     try {
       const res = await axios.post(
         URL,
         {
-          name: name,
           email: email,
           password: password,
         },
@@ -29,40 +28,52 @@ const Login = () => {
           },
         }
       );
-  
+
       // Logging response data and status code
       console.log("Response data:", res.data);
       console.log("Status code:", res.status);
-  
-      // Update state with the response
-      setResponse(res);
-  
+
+      // Show success toast
+      if (res.status === 200) {
+        toast.success(res.data.message || "user login successfully!", {
+          position: "top-right",
+          autoClose: 10000,
+          closeOnClick: true,
+          pauseOnHover: true,
+        });
+      }
     } catch (error) {
       // Error handling
       console.error(
         "Error during form submission:",
         error.response ? error.response.data : error.message
       );
-      
+
       // If the error response exists, log the status code
       if (error.response) {
         console.error("Error status code:", error.response.status);
+        if (error.response.status === 500) {
+          toast.error(error.response.data.error || "something went wrong", {
+            position: "top-right",
+            autoClose: 10000,
+            closeOnClick: true,
+            pauseOnHover: true,
+          });
+        }
       }
     }
-  
+
     // Clear form fields
-    setName("");
     setEmail("");
     setPassword("");
   };
-  
 
   return (
     <Container style={{ marginTop: "5vh" }}>
       <h4 style={{ textAlign: "center" }}>Login</h4>
       <Container style={{ marginTop: "15vh", width: "50vw" }}>
         <Form onSubmit={handleFormSubmit}>
-          <Form.Group>
+          {/* <Form.Group>
             <Form.Label>Name</Form.Label>
             <Form.Control
               type="text"
@@ -71,7 +82,7 @@ const Login = () => {
               }}
               value={name}
             />
-          </Form.Group>
+          </Form.Group> */}
           <Form.Group>
             <Form.Label>Email</Form.Label>
             <Form.Control
@@ -102,6 +113,8 @@ const Login = () => {
           </Button>
         </Form>
       </Container>
+      <ToastContainer />
+
     </Container>
   );
 };
