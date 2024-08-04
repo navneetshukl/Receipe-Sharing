@@ -17,5 +17,5 @@ type User struct {
 
 type UserUseCaseImpl interface {
 	AddUser(user *User) error
-	LoginUser(loginData *LoginUser) (string, string, error)
+	LoginUser(loginData *LoginUser) (string,string, error)
 }

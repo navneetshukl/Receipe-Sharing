@@ -3,7 +3,6 @@ package user
 import (
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/navneetshukl/receipe-sharing/internal/core/user"
@@ -57,16 +56,16 @@ func (uh *UserHandler) LoginUserHandler() func(c *gin.Context) {
 
 		//save jwt token to cookie
 		c.SetSameSite(http.SameSiteLaxMode)
-		c.SetCookie("Authorization", jwtToken, int(time.Hour*24*30), "/", "", false, true)
-		value, err := c.Cookie("Authorization")
+		c.SetCookie("auth", jwtToken, 3600, "/", "", false, true)
+		value, err := c.Cookie("auth")
 		if err != nil {
 			log.Println("Error in getting cookie value in login ", err)
 		} else {
 			log.Println("Cookie value in login is ", value)
 		}
 		c.JSON(200, gin.H{
-			"token":  jwtToken,
 			"userId": userID,
+			"token":  jwtToken,
 		})
 	}
 }

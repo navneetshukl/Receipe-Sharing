@@ -40,7 +40,7 @@ func AuthenticateJWT(c *gin.Context) {
 	// 	log.Fatal("Error loading .env file", err)
 	// 	return
 	// }
-	tokenString, err := c.Cookie("Authorization")
+	tokenString, err := c.Cookie("auth")
 	secret := os.Getenv("JWT_SECRET_KEY")
 
 	if err != nil {

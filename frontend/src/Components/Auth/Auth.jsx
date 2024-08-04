@@ -6,14 +6,21 @@ const Auth = () => {
   const URL = "http://localhost:8080/api/auth";
 
   const [resp, setResp] = useState(null);
-  const handleClick = () => {
-    const resp = axios.get(URL);
-    console.log(resp.data);
-    setResp(resp.data);
+  const handleClick = async () => {
+    try {
+      // Set withCredentials to true to ensure cookies are sent
+      const response = await axios.get(URL, { withCredentials: true });
+      console.log(response.data);
+      setResp(response.data);
+    } catch (error) {
+      console.error("Error fetching data:", error.response ? error.response.data : error.message);
+      setResp("Error fetching data");
+    }
   };
+
   return (
     <div>
-      <Button onClick={handleClick}> Press me</Button>
+      <Button onClick={handleClick}>Press me</Button>
       <p>{resp}</p>
     </div>
   );
