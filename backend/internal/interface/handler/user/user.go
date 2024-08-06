@@ -4,7 +4,6 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/navneetshukl/receipe-sharing/internal/core/user"
@@ -76,8 +75,7 @@ func (uh *UserHandler) LoginUserHandler(c *fiber.Ctx) error {
 		return handleError(c, errors.New("token not created"))
 	}
 
-	log.Println("token created is ",isToken)
-	time.Sleep(1*time.Second)
+	log.Println("token created is ", isToken)
 
 	return c.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "user login successfully",
@@ -95,6 +93,6 @@ func (uh *UserHandler) AuthHandler(c *fiber.Ctx) error {
 
 	return c.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "user authenticated",
-		"email":  value,
+		"email":   value,
 	})
 }

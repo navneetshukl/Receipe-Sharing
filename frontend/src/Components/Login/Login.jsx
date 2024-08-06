@@ -26,6 +26,7 @@ const Login = () => {
           headers: {
             "Content-Type": "application/json",
           },
+          withCredentials: true,
         }
       );
 
@@ -114,7 +115,6 @@ const Login = () => {
         </Form>
       </Container>
       <ToastContainer />
-
     </Container>
   );
 };
