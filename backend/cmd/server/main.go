@@ -34,7 +34,7 @@ func main() {
 
 	router := routes.SetUpRoutes(*receipeHandler, *userHandler)
 
-	err := router.Run(":8080")
+	err := router.Listen(":8080")
 	if err != nil {
 		log.Println("error in starting the server ", err)
 		return

@@ -9,7 +9,6 @@ import (
 	"github.com/navneetshukl/receipe-sharing/internal/core/user"
 	"github.com/navneetshukl/receipe-sharing/pkg/helper"
 	"github.com/navneetshukl/receipe-sharing/pkg/logging"
-	"github.com/navneetshukl/receipe-sharing/pkg/middleware"
 )
 
 type UserUseCase struct {
@@ -87,44 +86,44 @@ func (uc *UserUseCase) AddUser(data *user.User) error {
 
 }
 
-func (uc *UserUseCase) LoginUser(loginData *user.LoginUser) (string, string, error) {
+func (uc *UserUseCase) LoginUser(loginData *user.LoginUser) (string, error) {
 	if loginData.Email == "" || len(loginData.Email) == 0 {
 		uc.Logs.ErrorLog("email is missing", nil)
-		return "", "", user.ErrMissingField
+		return "", user.ErrMissingField
 	}
 
 	loginUser, err := uc.User.FindUserByEmailOrPhone(loginData.Email, false)
 	if err != nil {
 		uc.Logs.ErrorLog("FindUserByEmailOrPhone ", err)
 		if err == db.ErrDocumentNotFound {
-			return "", "", user.ErrUserNotFound
+			return "", user.ErrUserNotFound
 		}
-		return "", "", user.ErrSomethingWentWrong
+		return "", user.ErrSomethingWentWrong
 	}
 
 	// Check if loginUser is nil
 	if loginUser == nil {
 		uc.Logs.ErrorLog("loginUser is nil", errors.New("user is not present"))
-		return "", "", user.ErrUserNotFound
+		return "", user.ErrUserNotFound
 	}
 
 	// Check if loginUser.Password is empty
 	if loginUser.Password == "" {
 		uc.Logs.ErrorLog("password is missing for user ", errors.New("password is missing"))
-		return "", "", user.ErrUserNotFound
+		return "", user.ErrUserNotFound
 	}
 	err = helper.ComaprePassword(loginData.Password, loginUser.Password)
 	if err != nil {
 		uc.Logs.ErrorLog("ComaprePassword ", err)
-		return "", "", user.ErrInvalidPassword
+		return "", user.ErrInvalidPassword
 	}
 
-	token, err := middleware.GenerateJWT(loginUser.ID.Hex())
-	if err != nil {
-		uc.Logs.ErrorLog("GenerateJWT ", err)
-		return "", "", user.ErrSomethingWentWrong
-	}
+	// token, err := middleware.GenerateJWT(loginUser.ID.Hex(),c)
+	// if err != nil {
+	// 	uc.Logs.ErrorLog("GenerateJWT ", err)
+	// 	return "", "", user.ErrSomethingWentWrong
+	// }
 
-	return token, loginUser.ID.Hex(), nil
+	return loginUser.ID.Hex(), nil
 
 }

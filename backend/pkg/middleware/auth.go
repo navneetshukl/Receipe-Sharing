@@ -1,78 +1,110 @@
 package middleware
 
 import (
+	"errors"
 	"fmt"
 	"log"
-	"os"
-	"time"
+	"net/http"
 
-	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v4"
-	"github.com/joho/godotenv"
+	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt"
 )
 
-func GenerateJWT(userID string) (string, error) {
+var secret = []byte("U23#$65@*&53@dert$&3!@#$31dD")
 
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Println("error in loading the .env ", err)
-		return "", err
-	}
-	secret := os.Getenv("JWT_SECRET_KEY")
-
+func CreateJwtCookie(userID string, c *fiber.Ctx) bool {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": userID,
-		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
+		"user": userID,
 	})
-	tokenString, err := token.SignedString([]byte(secret))
 
+	tokenString, err := token.SignedString(secret)
 	if err != nil {
-		log.Println("Error in signing the token ", err)
-		return "", err
-	}
+		log.Println("failed to create token ", err)
+		return false
+	} else {
+		log.Println("Token created")
+		// c.SetCookie("Authorise", tokenString, 3600, "/", "", false, true)
+		// c.SetSameSite(http.SameSiteNoneMode)
 
-	return tokenString, nil
+		c.Cookie(&fiber.Cookie{
+			Name:     "authorise",
+			Value:    tokenString,
+			MaxAge:   3600,
+			Domain:   "",
+			Path:     "/",
+			Secure:   false,
+			HTTPOnly: true,
+			SameSite: "None",
+		})
+
+		return true
+	}
 }
 
-func AuthenticateJWT(c *gin.Context) {
-	// err := godotenv.Load()
-	// if err != nil {
-	// 	log.Fatal("Error loading .env file", err)
-	// 	return
-	// }
-	tokenString, err := c.Cookie("auth")
-	secret := os.Getenv("JWT_SECRET_KEY")
+func RetrieveJwtToken(c *fiber.Ctx) (string, error) {
+	cookie := c.Cookies("authorise")
 
-	if err != nil {
-		log.Println("Error in Getting the Tokenstring from cookie ", err)
-		return
+	headers := c.GetReqHeaders()
 
-	}
+	log.Println("headers in retrieve jwt is ", headers)
 
-	token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(secret), nil
-	})
-
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-
-		if float64(time.Now().Unix()) > claims["exp"].(float64) {
-			return
-
-		}
-		userID := claims["sub"].(string)
-		if userID == "" {
-			return
-
-		}
-		c.Set("user", userID)
-		c.Next()
-
+	if len(cookie) == 0 {
+		return "", errors.New("cookie not found")
 	} else {
-		return
+		token, err := jwt.Parse(cookie, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
 
+			return secret, nil
+		})
+
+		if err != nil {
+			return "", err
+		}
+
+		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+			userID := claims["user"].(string)
+			return userID, nil
+		} else {
+			return "", fmt.Errorf("invalid token")
+		}
+	}
+}
+
+func ValidateCookie(c *fiber.Ctx) bool {
+	cookie := c.Cookies("authorise")
+
+	headers := c.GetReqHeaders()
+
+	log.Println("headers in validate cookie is  ", headers)
+
+	if len(cookie) == 0 || cookie == "" {
+		fmt.Println("cookie not found in validate cookie")
+		return false
+	} else {
+		return true
+	}
+}
+
+func ValidateJwt(c *fiber.Ctx) error {
+	valid := ValidateCookie(c)
+	if !valid {
+		return c.Status(http.StatusUnauthorized).JSON(&fiber.Map{
+			"error": "user not login",
+		})
 	}
 
+	userID, err := RetrieveJwtToken(c)
+	if err != nil {
+		log.Println("error in retrieving token", err)
+		return c.Status(http.StatusUnauthorized).JSON(&fiber.Map{
+			"error": "cookie retrieving failed",
+		})
+	}
+
+	log.Println("UserID is ", userID)
+
+	c.Locals("userID", userID)
+	return c.Next()
 }

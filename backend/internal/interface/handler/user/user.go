@@ -1,11 +1,14 @@
 package user
 
 import (
+	"errors"
 	"log"
 	"net/http"
+	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	"github.com/navneetshukl/receipe-sharing/internal/core/user"
+	"github.com/navneetshukl/receipe-sharing/pkg/middleware"
 )
 
 type UserHandler struct {
@@ -18,64 +21,80 @@ func NewUserHandler(uc user.UserUseCaseImpl) *UserHandler {
 	}
 }
 
-func (uh *UserHandler) CreateUserHandler() func(c *gin.Context) {
-	return func(c *gin.Context) {
-		var userDet user.User
-		err := c.ShouldBindJSON(&userDet)
-		if err != nil {
-			c.JSON(400, gin.H{"error": "Invalid request body"})
-			return
-		}
-		err = uh.userUsecaseImpl.AddUser(&userDet)
-		if err != nil {
-			handleError(c, err)
-			return
-		}
-		c.JSON(201, userDet)
+func (uh *UserHandler) CreateUserHandler(c *fiber.Ctx) error {
+
+	var userDet user.User
+	err := c.BodyParser(&userDet)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+			"error": "Invalid request body",
+		})
 
 	}
+	err = uh.userUsecaseImpl.AddUser(&userDet)
+	if err != nil {
+		return handleError(c, err)
+	}
+	return c.Status(http.StatusOK).JSON(&fiber.Map{
+		"message": "user registered successfully",
+	})
+
 }
 
-func (uh *UserHandler) LoginUserHandler() func(c *gin.Context) {
-	return func(c *gin.Context) {
+func (uh *UserHandler) LoginUserHandler(c *fiber.Ctx) error {
 
-		var loginUser user.LoginUser
-		err := c.ShouldBindJSON(&loginUser)
-		if err != nil {
-			handleError(c, err)
-			return
-		}
+	var loginUser user.LoginUser
+	err := c.BodyParser(&loginUser)
+	if err != nil {
+		return handleError(c, err)
 
-		log.Println("login user is ", loginUser)
-
-		jwtToken, userID, err := uh.userUsecaseImpl.LoginUser(&loginUser)
-		if err != nil {
-			handleError(c, err)
-			return
-		}
-
-		//save jwt token to cookie
-		c.SetSameSite(http.SameSiteLaxMode)
-		c.SetCookie("auth", jwtToken, 3600, "/", "", false, true)
-		value, err := c.Cookie("auth")
-		if err != nil {
-			log.Println("Error in getting cookie value in login ", err)
-		} else {
-			log.Println("Cookie value in login is ", value)
-		}
-		c.JSON(200, gin.H{
-			"userId": userID,
-			"token":  jwtToken,
-		})
 	}
+
+	log.Println("login user is ", loginUser)
+
+	userID, err := uh.userUsecaseImpl.LoginUser(&loginUser)
+	if err != nil {
+		return handleError(c, err)
+
+	}
+
+	//save jwt token to cookie
+
+	// c.Cookie(&fiber.Cookie{
+	// 	Name:     "auth",
+	// 	Value:    jwtToken,
+	// 	MaxAge:   3600,
+	// 	Domain:   "",
+	// 	Path:     "/",
+	// 	Secure:   false,
+	// 	HTTPOnly: true,
+	// 	SameSite: "None",
+	// })
+
+	isToken := middleware.CreateJwtCookie(userID, c)
+	if !isToken {
+		return handleError(c, errors.New("token not created"))
+	}
+
+	log.Println("token created is ",isToken)
+	time.Sleep(1*time.Second)
+
+	return c.Status(http.StatusOK).JSON(&fiber.Map{
+		"message": "user login successfully",
+		"userID":  userID,
+	})
+
 }
 
-func (uh *UserHandler) AuthHandler() func(c *gin.Context) {
-	return func(c *gin.Context) {
-		value, _ := c.Get("user")
-		log.Println("Value is ", value)
-		c.JSON(http.StatusOK, gin.H{
-			"message": "user authenticated",
-		})
-	}
+func (uh *UserHandler) AuthHandler(c *fiber.Ctx) error {
+
+	value := c.Locals("userID")
+	log.Println("Value is ", value)
+	headers := c.GetReqHeaders()
+	log.Println("Headers is ", headers)
+
+	return c.Status(http.StatusOK).JSON(&fiber.Map{
+		"message": "user authenticated",
+		"email":  value,
+	})
 }

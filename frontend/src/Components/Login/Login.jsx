@@ -64,8 +64,8 @@ const Login = () => {
     }
 
     // Clear form fields
-    setEmail("");
-    setPassword("");
+    // setEmail("");
+    // setPassword("");
   };
 
   return (

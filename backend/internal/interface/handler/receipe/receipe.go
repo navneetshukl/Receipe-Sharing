@@ -3,7 +3,7 @@ package receipe
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	"github.com/navneetshukl/receipe-sharing/internal/core/receipe"
 )
 
@@ -17,24 +17,23 @@ func NewReceipeHandler(ru receipe.ReceipeUseCaseImpl) *ReceipeHandler {
 	}
 }
 
-func (h *ReceipeHandler) CreateReceipeHandler() func(c *gin.Context) {
-	return func(c *gin.Context) {
+func (h *ReceipeHandler) CreateReceipeHandler(c *fiber.Ctx) error {
+	
 		var resp receipe.Receipe
 
-		err := c.ShouldBindJSON(&resp)
+		err := c.BodyParser(&resp)
 		if err != nil {
-			handlerError(c, err)
-			return
+			return handlerError(c, err)
 		}
 
 		err = h.receipeUsecaseImpl.AddReceipe(resp)
 		if err != nil {
-			handlerError(c, err)
-			return
+			return handlerError(c, err)
 		}
-		c.JSON(http.StatusOK, gin.H{
+
+		return c.Status(http.StatusOK).JSON(&fiber.Map{
 			"message": "data inserted successfully",
 			"data":    []string{},
 		})
-	}
+	
 }

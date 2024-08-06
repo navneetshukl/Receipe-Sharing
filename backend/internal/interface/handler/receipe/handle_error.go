@@ -4,21 +4,20 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	"github.com/navneetshukl/receipe-sharing/internal/core/receipe"
 )
 
-func handlerError(c *gin.Context, err error) {
+func handlerError(c *fiber.Ctx, err error) error {
 	switch {
 	case errors.Is(err, receipe.ErrAddingReceipe):
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Error adding receipe",
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Error adding recipe",
 		})
 
 	default:
-		c.JSON(http.StatusInternalServerError, gin.H{
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Something went wrong",
 		})
-
 	}
 }
