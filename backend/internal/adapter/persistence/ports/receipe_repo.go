@@ -5,5 +5,5 @@ import (
 )
 
 type ReceipeRepo interface {
-	InsertReceipe(data receipe.Receipe) error
+	InsertReceipe(data *receipe.Receipe) error
 }

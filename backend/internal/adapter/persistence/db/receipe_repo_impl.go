@@ -18,7 +18,7 @@ func NewReceipeDatabase(db *mongo.Database) *ReceipeDatabase {
 	}
 }
 
-func (rd *ReceipeDatabase) InsertReceipe(data receipe.Receipe) error {
+func (rd *ReceipeDatabase) InsertReceipe(data *receipe.Receipe) error {
 
 	_, err := rd.db.Collection("receipe").InsertOne(context.Background(), data)
 	if err != nil {

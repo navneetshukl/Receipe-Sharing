@@ -53,7 +53,7 @@ func SetUpRoutes(receipeHandler receipe.ReceipeHandler, userHandler user.UserHan
 		AllowCredentials: true,
 	}))
 
-	app.Post("/api/receipe/add", receipeHandler.CreateReceipeHandler)
+	app.Post("/api/receipe/add", middleware.ValidateJwt,receipeHandler.CreateReceipeHandler)
 	app.Post("/api/user/register", userHandler.CreateUserHandler)
 	app.Post("/api/user/login", userHandler.LoginUserHandler)
 

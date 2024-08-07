@@ -12,11 +12,11 @@ function App() {
   return (
     <>
       {/* <Home/> */}
-      {/* <Descripition /> */}
+      <Descripition />
       <Login/>
       {/* <Register/> */}
 
-      <Auth/>
+      {/* <Auth/> */}
     </>
   );
 }
