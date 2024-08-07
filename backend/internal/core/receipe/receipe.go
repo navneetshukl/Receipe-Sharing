@@ -16,5 +16,5 @@ type Receipe struct {
 }
 
 type ReceipeUseCaseImpl interface {
-	AddReceipe(data Receipe) error
+	AddReceipe(userID string,data *Receipe) error
 }

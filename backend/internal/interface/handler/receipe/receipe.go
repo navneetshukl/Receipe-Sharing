@@ -18,22 +18,24 @@ func NewReceipeHandler(ru receipe.ReceipeUseCaseImpl) *ReceipeHandler {
 }
 
 func (h *ReceipeHandler) CreateReceipeHandler(c *fiber.Ctx) error {
-	
-		var resp receipe.Receipe
 
-		err := c.BodyParser(&resp)
-		if err != nil {
-			return handlerError(c, err)
-		}
+	var resp receipe.Receipe
 
-		err = h.receipeUsecaseImpl.AddReceipe(resp)
-		if err != nil {
-			return handlerError(c, err)
-		}
+	userID := c.Locals("userID")
 
-		return c.Status(http.StatusOK).JSON(&fiber.Map{
-			"message": "data inserted successfully",
-			"data":    []string{},
-		})
-	
+	err := c.BodyParser(&resp)
+	if err != nil {
+		return handlerError(c, err)
+	}
+
+	err = h.receipeUsecaseImpl.AddReceipe(userID.(string), &resp)
+	if err != nil {
+		return handlerError(c, err)
+	}
+
+	return c.Status(http.StatusOK).JSON(&fiber.Map{
+		"message": "data inserted successfully",
+		"data":    []string{},
+	})
+
 }
